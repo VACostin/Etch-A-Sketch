@@ -1,79 +1,95 @@
-function initializeGrid(gridSize) {
-  const body = document.querySelector('body');
-  const grid = document.createElement('div');
-  const gridLine = document.createElement('div');
-  const gridSquare = document.createElement('div');
-
-  grid.setAttribute("id", "grid");
-  gridLine.classList.add("gridLine");
-  gridSquare.classList.add("gridSquare");
-
-  const sizeRatio = 100 / gridSize;
-  const sizeRatioString = sizeRatio.toString() + "%"
-
-  gridLine.style.height = sizeRatioString;
-  gridSquare.style.width = sizeRatioString;
-
-  for (let i = 0; i < gridSize; i++) {
-    let gridSquareClone = gridSquare.cloneNode(true);
-    gridLine.appendChild(gridSquareClone);
+class GridManager {
+  constructor(gridSize) {
+    this.gridSize = gridSize;
+    this.gridElement = null;
   }
 
-  for (let i = 0; i < gridSize; i++) {
-    let gridLineClone = gridLine.cloneNode(true);
-    grid.appendChild(gridLineClone);
+  createGrid() {
+    this.gridElement = document.createElement('div');
+    this.gridElement.setAttribute('id', 'grid');
+
+    const gridLine = document.createElement('div');
+    gridLine.classList.add('gridLine');
+
+    const gridSquare = document.createElement('div');
+    gridSquare.classList.add('gridSquare');
+
+    const sizeRatio = 100 / this.gridSize;
+    const sizeRatioString = sizeRatio + '%';
+
+    gridLine.style.height = sizeRatioString;
+    gridSquare.style.width = sizeRatioString;
+
+    for (let i = 0; i < this.gridSize; i++) {
+      const gridSquareClone = gridSquare.cloneNode(true);
+      gridLine.appendChild(gridSquareClone);
+    }
+
+    for (let i = 0; i < this.gridSize; i++) {
+      const gridLineClone = gridLine.cloneNode(true);
+      this.gridElement.appendChild(gridLineClone);
+    }
+
+    document.body.appendChild(this.gridElement);
   }
 
-  body.appendChild(grid);
+  deleteGrid() {
+    if (this.gridElement) {
+      this.gridElement.remove();
+      this.gridElement = null;
+    }
+  }
+
+  changeGridSquareColor(gridSquare) {
+    gridSquare.style.backgroundColor = 'red';
+  }
+
+  addHoverProperty() {
+    if (this.gridElement) {
+      const gridSquares = this.gridElement.querySelectorAll('.gridSquare');
+
+      gridSquares.forEach((gridSquare) => {
+        gridSquare.addEventListener('mouseover', () => {
+          this.changeGridSquareColor(gridSquare);
+        });
+      });
+    }
+  }
 }
 
-function changeGridSquareColor(gridSquare) {
-  gridSquare.style.backgroundColor = "red";
+function handleGridEditing(userPrompt) {
+  if (isNumeric(userPrompt)) {
+    let gridSize = parseInt(userPrompt);
+    if (gridSize > 100) {
+      gridSize = 100;
+    }
+
+    gridManager.deleteGrid();
+    gridManager = new GridManager(gridSize);
+    gridManager.createGrid();
+    gridManager.addHoverProperty();
+  } else {
+    alert('Please enter a numeric value.');
+  }
 }
 
 function isNumeric(value) {
   return /^\d+$/.test(value);
 }
 
-function deleteGrid() {
-  const grid = document.querySelector("#grid");
-  grid.remove();
-}
+let gridManager = null;
 
-function editGrid(userPrompt) {
-  if (isNumeric(userPrompt)) {
-    let gridSize = parseInt(userPrompt);
-    if(gridSize > 100)
-      gridSize = 100;
-    deleteGrid();
-    initializeGrid(gridSize);
-    addHoverProperty();
-  }
-  else
-    alert(typeof (userPrompt));
-}
+function initialize() {
+  const gridSize = 16;
+  gridManager = new GridManager(gridSize);
+  gridManager.createGrid();
+  gridManager.addHoverProperty();
 
-
-// 3
-function addHoverProperty() {
-  const gridSquares = document.querySelectorAll(".gridSquare");
-
-  gridSquares.forEach(gridSquare => {
-    gridSquare.addEventListener("mouseover", () => {
-      changeGridSquareColor(gridSquare);
-    })
+  const button = document.querySelector('button');
+  button.addEventListener('click', () => {
+  const userPrompt = prompt('Enter grid size:');
+  handleGridEditing(userPrompt);
   });
-}
-
-// 2
-const gridSize = 16;
-initializeGrid(gridSize);
-addHoverProperty();
-
-// 4
-const button = document.querySelector("button");
-console.log(button);
-button.addEventListener("click", () => {
-  const userPrompt = prompt();
-  editGrid(userPrompt);
-})
+  }
+  
+  initialize();
